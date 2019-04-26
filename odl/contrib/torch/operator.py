@@ -123,13 +123,12 @@ class OperatorAsAutogradFunction(torch.autograd.Function):
             op_result = np.array(op_result, ndmin=1,
                                  dtype=self.operator.domain.dtype)
         tensor = torch.from_numpy(np.array(op_result, copy=False, ndmin=1))
-        if input.is_cuda:
-            # Push back to GPU
-            tensor = tensor.cuda()
+        tensor = tensor.to(input.device)
+        
         return tensor
 
     def backward(self, grad_output):
-        r"""Apply the adjoint of the derivative at ``grad_output``.
+        """Apply the adjoint of the derivative at ``grad_output``.
 
         This method is usually not called explicitly but as a part of the
         ``cost.backward()`` pass of a backpropagation step.
@@ -200,14 +199,14 @@ class OperatorAsAutogradFunction(torch.autograd.Function):
         function. In ODL language, what ``backward`` should compute is
 
         .. math::
-            \nabla(C \circ f)(x) = f'(x)^*\big(\nabla C (f(x))\big)
+            \\nabla(C \circ f)(x) = f'(x)^*\\big(\\nabla C (f(x))\\big)
 
         according to the chain rule. In ODL code, this corresponds to ::
 
             f.derivative(x).adjoint(C.gradient(f(x))).
 
         Hence, the parameter ``grad_output`` is a tensor variable containing
-        :math:`y = \nabla C(f(x))`. Then, ``backward`` boils down to
+        :math:`y = \\nabla C(f(x))`. Then, ``backward`` boils down to
         computing ``[f'(x)^*(y)]`` using the input ``x`` stored during
         the previous `forward` pass.
         """
@@ -253,9 +252,7 @@ class OperatorAsAutogradFunction(torch.autograd.Function):
 
             grad = torch.from_numpy(np.array(grad_odl, copy=False, ndmin=1))
 
-            if grad_output.is_cuda:
-                # Push back to GPU
-                grad = grad.cuda()
+            grad = grad.to(grad_output.device)
 
         return grad
 
