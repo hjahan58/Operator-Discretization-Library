@@ -1,0 +1,18 @@
+util
+====
+
+Utilities for tomography.
+
+.. currentmodule:: odl.tomo.util
+
+
+.. rubric:: Modules
+
+.. toctree::
+   :maxdepth: 2
+
+   odl.tomo.util.testutils
+   odl.tomo.util.utility
+
+
+
